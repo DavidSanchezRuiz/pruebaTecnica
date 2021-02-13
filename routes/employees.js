@@ -4,7 +4,7 @@ const _ = require('lodash');
 const router = express.Router();
 
 router.get('/', function (req, res) {
-  const sql = "select * from type"
+  const sql = "select * from employee"
   const params = []
   req.app.get('db').all(sql, params, (err, rows) => {
     if (err) {
@@ -16,7 +16,7 @@ router.get('/', function (req, res) {
 });
 
 router.get("/:id", (req, res) => {
-  const sql = "select * from type where id = ?"
+  const sql = "select * from employee where id = ?"
   const params = [req.params.id]
   req.app.get('db').get(sql, params, (err, row) => {
     if (err) {
@@ -36,8 +36,8 @@ router.post("/", (req, res) => {
     return;
   }
 
-  const sql = 'INSERT INTO type (name) VALUES (?)'
-  const params = [req.body.name]
+  const sql = 'INSERT INTO employee (name,phone,address,types_id) VALUES (?,?,?,?)'
+  const params = [req.body.name, req.body.phone, req.body.address, req.body.types_id]
   req.app.get('db').run(sql, params, function (err) {
     if (err) {
       res.status(400).json({"error": err.message})
@@ -53,10 +53,14 @@ router.put("/:id", (req, res) => {
     res.status(422).json(errors);
     return;
   }
-  const sql = `UPDATE type set 
-           name = COALESCE(?,name)
+
+  const sql = `UPDATE employee set 
+           name = COALESCE(?,name),
+           phone = COALESCE(?,phone),
+           address = COALESCE(?,address),
+           types_id = COALESCE(?,types_id)
            WHERE id = ?`
-  const params = [req.body.name, req.params.id]
+  const params = [req.body.name, req.body.phone, req.body.address, req.body.types_id, req.params.id]
   req.app.get('db').run(sql, params, function (err) {
     if (err) {
       res.status(400).json({"error": res.message})
@@ -67,7 +71,7 @@ router.put("/:id", (req, res) => {
 })
 
 router.delete("/:id", (req, res) => {
-  const sql = 'DELETE FROM type WHERE id = ?'
+  const sql = 'DELETE FROM employee WHERE id = ?'
   const params = [req.params.id]
   req.app.get('db').run(sql, params, function (err) {
     if (err) {
@@ -83,5 +87,7 @@ module.exports = router;
 function validBody(req) {
   let errors = {}
   if (!req.body.name) errors.name = "El campo name es requerido."
+  if (!req.body.phone || typeof req.body.phone !== "number") errors.phone = "El campo phone es requerido y debe ser de tipo numerico."
+  if (!req.body.address) errors.address = "El campo address es requerido."
   return errors
 }
