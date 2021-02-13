@@ -1,6 +1,8 @@
+#Link rueba desplegada:
+https://pruebatecnicadavid.herokuapp.com/
 #Urls
 
-##Types
+#Types
 
 **GET /types**
 
@@ -12,7 +14,7 @@
 
 **DELETE /types/:id**
 
-##Employees
+#Employees
 
 **GET /employees**
 
@@ -24,7 +26,7 @@
 
 **DELETE /employees/:id**
 
-##Contracts
+#Contracts
 
 **GET /contracts**
 
