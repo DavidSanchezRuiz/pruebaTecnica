@@ -7,8 +7,9 @@ router.get('/', function (req, res) {
 });
 
 router.get('/init-database', function (req, res) {
-  //require('../databaseInit/typesModel').create(req.app.get('db'));
-  // require('../databaseInit/employeesModel').create(req.app.get('db'));
+  require('../databaseInit/typesModel').create(req.app.get('db'));
+  require('../databaseInit/employeesModel').create(req.app.get('db'));
+  require('../databaseInit/contractsModel').create(req.app.get('db'));
   res.json({"message": "Ok"});
 });
 

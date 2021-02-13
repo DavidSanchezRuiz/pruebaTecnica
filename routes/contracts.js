@@ -4,7 +4,7 @@ const _ = require('lodash');
 const router = express.Router();
 
 router.get('/', function (req, res) {
-  const sql = "select * from employee"
+  const sql = "select * from contract"
   const params = []
   req.app.get('db').all(sql, params, (err, rows) => {
     if (err) {
@@ -16,7 +16,7 @@ router.get('/', function (req, res) {
 });
 
 router.get("/:id", (req, res) => {
-  const sql = "select * from employee where id = ?"
+  const sql = "select * from contract where id = ?"
   const params = [req.params.id]
   req.app.get('db').get(sql, params, (err, row) => {
     if (err) {
@@ -30,8 +30,14 @@ router.get("/:id", (req, res) => {
 });
 
 router.post("/", (req, res) => {
-  const sql = 'INSERT INTO employee (name,phone,address,types_id) VALUES (?,?,?,?)'
-  const params = [req.body.name, req.body.phone, req.body.address, req.body.types_id]
+  let errors = validBody(req)
+  if (!_.isEmpty(errors)) {
+    res.status(422).json(errors);
+    return;
+  }
+
+  const sql = 'INSERT INTO contract (name,date,file,employees_id) VALUES (?,?,?,?)'
+  const params = [req.body.name, req.body.date, req.body.file, req.body.employees_id]
   req.app.get('db').run(sql, params, function (err) {
     if (err) {
       res.status(400).json({"error": err.message})
@@ -42,13 +48,19 @@ router.post("/", (req, res) => {
 })
 
 router.put("/:id", (req, res) => {
-  const sql = `UPDATE employee set 
+  let errors = validBody(req)
+  if (!_.isEmpty(errors)) {
+    res.status(422).json(errors);
+    return;
+  }
+
+  const sql = `UPDATE contract set 
            name = COALESCE(?,name),
-           phone = COALESCE(?,phone),
-           address = COALESCE(?,address),
-           types_id = COALESCE(?,types_id)
+           date = COALESCE(?,date),
+           file = COALESCE(?,file),
+           employees_id = COALESCE(?,employees_id)
            WHERE id = ?`
-  const params = [req.body.name, req.body.phone, req.body.address, req.body.types_id, req.params.id]
+  const params = [req.body.name, req.body.date, req.body.file, req.body.employees_id, req.params.id]
   req.app.get('db').run(sql, params, function (err) {
     if (err) {
       res.status(400).json({"error": res.message})
@@ -59,7 +71,7 @@ router.put("/:id", (req, res) => {
 })
 
 router.delete("/:id", (req, res) => {
-  const sql = 'DELETE FROM employee WHERE id = ?'
+  const sql = 'DELETE FROM contract WHERE id = ?'
   const params = [req.params.id]
   req.app.get('db').run(sql, params, function (err) {
     if (err) {
@@ -71,3 +83,11 @@ router.delete("/:id", (req, res) => {
 })
 
 module.exports = router;
+
+function validBody(req) {
+  let errors = {}
+  if (!req.body.name) errors.name = "El campo name es requerido."
+  if (!req.body.date) errors.date = "El campo date es requerido y debe ser de tipo fecha."
+  if (!req.body.file) errors.file = "El campo file es requerido."
+  return errors
+}
